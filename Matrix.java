@@ -3,58 +3,131 @@ package com.company;
 import java.util.*;
 
 public class Matrix {
-    private ArrayList<ArrayList<Double>> mat;
+    private Double [][] mat;
     private int Rows,Columns; //sizes
 
     /////////////////////////////////////////
     //Constructors
     Matrix(){
-        mat = new ArrayList();
-        ArrayList<Double> temp = new ArrayList();
-        mat.add(temp);
+        mat = new Double[0][0];
         Rows = 0;
         Columns = 0;
     }
 
     Matrix(int n){
-        mat = new ArrayList(n);
-        ArrayList<Double> temp = new ArrayList(n);
-        Double t = new Double(0);
-        for(int i = 0; i < n; i++){
-            temp.set(i,t);
-        }
+        Rows = n;
+        Columns = n;
+        mat = new Double[n][n];
         for (int i = 0; i < n; i++){
-            mat.add(temp);
+            for (int j = 0; j < n; j++){
+                mat[i][j] = new Double(0);
+            }
         }
     }
 
     Matrix(int n, int m){
-        mat = new ArrayList(n);
-        ArrayList<Double> temp = new ArrayList(m);
-        Double t = new Double(0);
-        for(int i = 0; i < m; i++){
-            temp.set(i,t);
-        }
-        for (int i = 0; i < n; i++){
-            mat.add(temp);
+        Rows = n;
+        Columns = m;
+        mat = new Double[n][m];
+
+        for (int i = 0;i < n; i++){
+            for (int j = 0; j < m; j++){
+                mat[i][j] = new Double(0);
+            }
         }
     }
 
-    Matrix(ArrayList<ArrayList<Double>> x){
-        mat = x;
-        Rows = x.size();
-        Columns = x.get(0).size();
+    Matrix(double [][] x){
+        this(x.length,x[0].length);
+        Rows = x.length;
+        Columns = x[0].length;
+
+
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                setValue(i,j,new Double(x[i][j]));
+            }
+        }
 
     }
+
+    Matrix(Matrix m){
+        this(m.Rows,m.Columns);
+        this.Rows = m.Rows;
+        this.Columns = m.Columns;
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                mat[i][j] = m.getValue(i,j);
+            }
+        }
+    }
+
+
+
+
     ///////////////////////////////////
 
-    private double sigmoid(double x){
-        return (1/( 1 + Math.pow(Math.E,(-1*x))));
+    public Matrix sigmoid(){
+        Matrix res = new Matrix(this);
+
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                double x= getValue(i,j).doubleValue();
+                res.setValue(i,j,(1/( 1 + Math.pow(Math.E,(-1*x)))));
+            }
+        }
+        return res;
     }
 
-    public void setValue(int row, int col, Double val){ mat.get(row).set(col,val);}
+    private Matrix sigmoidPrime(){
+        Matrix res = new Matrix(this);
 
-    public Double getValue(int row, int col){ mat.get(row).get(col);}
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                double x = getValue(i,j);
+                double ex = Math.pow(Math.E,-1*x);
+
+                x = ex * Math.pow(1+ex,2);
+
+                res.setValue(i,j,x);
+            }
+        }
+        return res;
+    }
+
+    public Matrix sigmaPrime(){
+        //Requires a nx1 matrix
+        //returns a diagonalized nxn matrix with the diagonal being simoidprime(input)
+
+        Matrix res = new Matrix(this.Rows);
+
+        Matrix outputSigmoidPrime = this.sigmoidPrime();
+        for (int i = 0; i < this.Rows; i++){
+            res.setValue(i,i,outputSigmoidPrime.getValue(i,0));
+        }
+        //set the values of sigmoidprime(output) to the diagonal
+
+        return res;
+    }
+
+
+
+
+    public void setValue(int row, int col, Double val){
+        try{
+            mat[row][col] = val;
+        } catch (IndexOutOfBoundsException e){
+            System.out.printf("Out of bounds - Height: %d, Width: %d\n",this.Rows,this.Columns);
+        }
+    }
+
+    public Double getValue(int row, int col){
+        try{
+            return mat[row][col];
+        } catch(IndexOutOfBoundsException e){
+            return Double.NaN;
+        }
+    }
 
     //this matrix is on the left, the given matrix is on the right
     public Matrix multiply(Matrix m){
@@ -74,7 +147,7 @@ public class Matrix {
 
                 }
                 //do the sigmoid operation
-                weightedSum = new Double(sigmoid(weightedSum));
+                weightedSum = new Double(weightedSum);
                 res.setValue(i,j,weightedSum);
 
             }
@@ -84,23 +157,78 @@ public class Matrix {
 
     }
 
-    public void multipliyScalar(double c){
+    public Matrix add(Matrix m){
+        Matrix res = new Matrix(m.Rows,m.Columns);
+
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                res.setValue(i,j,this.getValue(i,j) + m.getValue(i,j));
+            }
+        }
+
+        return res;
+    }
+
+
+    public int sizex(){ return Columns;}
+    public int sizey(){ return Rows;}
+
+
+    Matrix Transpose(){
+        Matrix res = new Matrix(Columns,Rows);
         for (int i = 0; i < Rows; i++){
             for (int j = 0; j < Columns; j++){
                 Double temp = getValue(i,j);
-                setValue(i,j,temp*c);
+                res.setValue(j,i,temp);
             }
         }
+        return res;
     }
 
-    public int sizex(){
-        try{
-            return mat.get(0).size();
-        } catch(IndexOutOfBoundsException){
-            return 0;
+    Matrix VectorCross(Matrix m){
+        Matrix res = new Matrix(m.Rows,this.Rows);
+
+        for (int i = 0; i < m.Rows; i++){
+            for (int j = 0; j < this.Rows; j++){
+                res.setValue(i,j,getValue(j,0)*m.getValue(i,0));
+            }
         }
+        return res;
     }
-    public int sizey(){ return mat.size();}
 
+    Matrix Inverse(){
+        //TODO Exception for non square matrix
+        Matrix res = new Matrix(Rows,Columns);
+        if (isDiagonal()){
+            for (int i = 0; i < Rows; i++){
+                try{
+                    res.setValue(i,i,1/res.getValue(i,i));  //do the inverse
+                }catch (ArithmeticException e){
+                    res.setValue(i,i,new Double(0));    //this value is 0
+                }
+            }
+        }
+        else{
+            //TODO Square normal matrix
+        }
+        return res;
+    }
 
+    boolean isDiagonal(){
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                if (i!=j && getValue(i,j)!=0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    //Inverse for a non-square matrix
+    Matrix PseudoInverse(){
+        Matrix AT = Transpose(); //Get transpose
+        Matrix A_inverse = (multiply(AT)).Inverse();    //(AT * A) ^-1
+        return AT.multiply(A_inverse);
+    }
 }

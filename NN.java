@@ -1,11 +1,13 @@
 package com.company;
 
 import com.company.Layer;
+import com.sun.tools.internal.ws.wsdl.document.Output;
+import jdk.internal.util.xml.impl.Input;
 
 public class NN {
     private Layer InputLayer = null;
-    private Layer HiddenLayer1 = null;
-    private Layer HiddenLayer2 = null;
+    private Layer HiddenLayer1;
+    private Layer HiddenLayer2;
     private Matrix OutputLayer = null;
 
     //Save State constructor
@@ -22,7 +24,25 @@ public class NN {
     }
 
     NN(){
-        //TODO
+        //everything is set to 0
+
+        //1x782 nodes
+        Matrix in = new Matrix(782,1);
+        //16x782 weights
+        Matrix w3 = new Matrix(16,782);
+        InputLayer = new Layer(in,w3);
+
+        //1x16 hidden layer nodes
+        Matrix n1 = new Matrix(16,1);
+        //16x16 hidden layer weights
+        Matrix w1 = new Matrix(16);
+        HiddenLayer1 = new Layer(n1,w1);
+
+        Matrix n2 = new Matrix(16,1);
+        //1x10 final output = 1x16 nodes * 16x10 weights
+        Matrix w2 = new Matrix(10,16);
+        HiddenLayer2 = new Layer(n2,w2);
+
     }
 
 
@@ -59,9 +79,9 @@ public class NN {
         //Then set that matrix as the nodes of the first hidden layer
         HiddenLayer1.setNodes(Hidden);
         //Then propogate to the second layer
-        Hidden = HiddenLayer1.multiply();
+        Matrix Hidden2 = HiddenLayer1.multiply();
 
-        HiddenLayer2.setNodes(Hidden);
+        HiddenLayer2.setNodes(Hidden2);
         //now assign to the output
         OutputLayer = HiddenLayer2.multiply();
 
@@ -72,7 +92,77 @@ public class NN {
      * @param correctValue
      */
     private void backPropagate(int correctValue){
-        //TODO
+        //This process is very iterative, and can be simplified if the layers are in arrays instead of discrete
+
+        //First, calculate error of output layer
+        Matrix sigmaPrime = OutputLayer.sigmaPrime(); //sigma prime is a 10x10 matrix with the diagonal being
+        //sigmoid prime(Z)
+
+        Matrix costGradient = Cost(correctValue);
+
+        Matrix delta3 = sigmaPrime.multiply(costGradient);   //the error of the output layer
+
+        //////////////////////////////////////////////////
+        //Find the second hidden layer delta
+        Matrix weights2 = HiddenLayer2.getWeights().Transpose(); //get transpose of the weights
+        Matrix nodes2 = HiddenLayer2.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+        Matrix delta2 = nodes2.multiply(weights2.multiply(delta3)); //the error for the second hidden layer
+        /////////////////////////////////////////////////
+        //Find the first hidden layer delta
+        Matrix weights1 = HiddenLayer1.getWeights().Transpose(); //get transpose of the weights
+        Matrix nodes1 = HiddenLayer1.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+        Matrix delta1 = nodes1.multiply(weights1.multiply(delta2)); //the error for the second hidden layer
+        /////////////////////////////////////////////////
+        //Find the input layer delta
+        Matrix weights0 = InputLayer.getWeights().Transpose(); //get transpose of the weights
+        Matrix nodes0 = InputLayer.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+        Matrix delta0 = nodes0.multiply(weights0.multiply(delta1)); //the error for the second hidden layer
+        ////////////////////////////////////////////////
+
+
+
+        //Now apply the changes to the weights and biases
+        //First the biases
+        ////////////////////////////////////////////////
+        Matrix inputBiases = InputLayer.getBiases();
+        Matrix Hidden1Biases = HiddenLayer1.getBiases();
+        Matrix Hidden2Biases = HiddenLayer2.getBiases();
+
+        //Add the delta to the biases
+        inputBiases = inputBiases.add(delta0);
+        Hidden1Biases = Hidden1Biases.add(delta1);
+        Hidden2Biases = Hidden2Biases.add(delta2);
+
+        //set the biases back into the layers
+        InputLayer.setBiases(inputBiases);
+        HiddenLayer1.setBiases(Hidden1Biases);
+        HiddenLayer2.setBiases(Hidden2Biases);
+        ///////////////////////////////////////////////
+
+        //Now the weights
+        ///////////////////////////////////////////////
+        Matrix inputWeights = InputLayer.getWeights();
+        Matrix Hidden1Weights = HiddenLayer1.getWeights();
+        Matrix Hidden2Weights = HiddenLayer2.getWeights();
+
+        inputWeights = inputWeights.add(InputLayer.getNodes().VectorCross(delta1));
+        Hidden1Weights = Hidden1Weights.add(HiddenLayer1.getNodes().VectorCross(delta2));
+        Hidden2Weights = Hidden2Weights.add(HiddenLayer2.getNodes().VectorCross(delta3));
+
+        InputLayer.setWeights(inputWeights);
+        HiddenLayer1.setWeights(Hidden1Weights);
+        HiddenLayer2.setWeights(Hidden2Weights);
+        //////////////////////////////////////////////
+
+
+    }
+
+    //calculates cost of guessed values
+    private Matrix Cost(int correctValue){
+        Matrix c = OutputLayer;
+        double guess = c.getValue(correctValue,0);
+        c.setValue(correctValue,0,guess-correctValue);
+        return c;
     }
 
     /**
@@ -101,14 +191,19 @@ public class NN {
      *
      * @param Input
      * @param correctValue
+     * the error at layer l neuron j is given by the partial of the cost function with respect to the partial of the
+     * neuron at layer l neuron j
      */
-    public void Train(Matrix Input, int correctValue){
+    public boolean Train(Matrix Input, int correctValue){
         //Assign the input
         newInput(Input);
         //Propagate the data
         FeedForward();
+        boolean res = IsOutput(correctValue);
         //Correct the mistakes
         backPropagate(correctValue);
+
+        return res;
     }
 
     /**
@@ -124,5 +219,12 @@ public class NN {
         FeedForward();
         //See if it is correct
         return IsOutput(correctValue);
+    }
+
+    public void printOutput(){
+        for (int i = 0; i < OutputLayer.sizey(); i++){
+            System.out.printf("%f \n",OutputLayer.getValue(i,0));
+        }
+        System.out.println();
     }
 }

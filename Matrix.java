@@ -37,16 +37,12 @@ public class Matrix {
         }
     }
 
-    Matrix(double [][] x){
-        this(x.length,x[0].length);
-        Rows = x.length;
-        Columns = x[0].length;
+    Matrix(double [] x){
+        this(x.length,1);
 
 
         for (int i = 0; i < Rows; i++){
-            for (int j = 0; j < Columns; j++){
-                setValue(i,j,new Double(x[i][j]));
-            }
+            setValue(i,0,x[i]);
         }
 
     }

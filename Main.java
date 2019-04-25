@@ -1,5 +1,21 @@
 
-
+/*
+ * THINGS TO DO
+ * diagrams
+ * UML
+ * SEQUENCE
+ * USE CASE
+ * code things
+ * INTERFACE
+ * (inheritance, composition, polymorphism)
+ * INPUT VALIDATION
+ * EXCEPTION HANDLING
+ * DOCUMENTATION
+ * PROPER ACCESS MODIFIERS
+ * demo
+ * PRESENTATION WITH DIAGRAMS
+ * PREPARED DEMO
+ */
     	package com.company;
 
     	import java.io.*;
@@ -23,7 +39,7 @@ import ImageParse.ProvidedImageDecoder;
     	    		String choice="";
     	    		do
     	    		{
-    	    			System.out.println("--Training Menu--\n1)First Run?\n2)Train From File\n3)Load Neural Network (-1 exit)");
+    	    			System.out.println("--Training Menu--\n1)First Run?\n2)Train From File\n3)Load Neural Network (-1 exit/next)");
     	    			choice = in.next();
     	    		}while(!choice.equals("1") && !choice.equals("2")&&!choice.equals("3")&&!choice.equals("-1"));
     	    		if(choice.equals("1"))
@@ -45,6 +61,7 @@ import ImageParse.ProvidedImageDecoder;
     	    	    	System.out.println("Matrices setup");
     	    	    	for(int i = 0; i<train.size();i++)
     	    		    {
+    	    	    		
     	    		    	first.Train(train.get(i), labels[i]);
     	    		    }
     	    		}
@@ -83,6 +100,8 @@ import ImageParse.ProvidedImageDecoder;
     	    	{
     	    		Scanner in = new Scanner(System.in);
     	    		String choice="";
+    	    		int correct=0;
+    	    		int total=0;
     	    		do
     	    		{
     	    			System.out.println("--Testing Menu--\n1)First Test?\n2)Test from file?\n3)Save Neural Network\n4)Load Neural Network (-1 exit)");
@@ -129,8 +148,15 @@ import ImageParse.ProvidedImageDecoder;
     	    	    	System.out.println("Testing data");
     	    	    	for(int i = 0; i<test.size();i++)
     	    		    {
-    	    	    		first.Test(test.get(i),labels[i]);
+    	    	    		if(first.Test(test.get(i),labels[i]))
+    	    	    		{
+    	    	    			correct++;
+    	    	    			total++;
+    	    	    		}
+    	    	    		else
+    	    	    			total++;
     	    		    }
+    	    	    	System.out.println("Neural Network Effectiveness: " +(double)correct/total *100 + " %");
     	    		}
     	    		else if(choice.equals("3"))
     	    		{

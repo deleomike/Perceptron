@@ -1,8 +1,9 @@
 package com.company;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Matrix {
+public class Matrix implements Serializable {
     private Double [][] mat;
     private int Rows,Columns; //sizes
 
@@ -37,7 +38,7 @@ public class Matrix {
         }
     }
 
-    Matrix(double [] x){
+    public Matrix(double [] x){
         this(x.length,1);
 
 
@@ -75,7 +76,7 @@ public class Matrix {
         return res;
     }
 
-    private Matrix sigmoidPrime(){
+    public Matrix sigmoidPrime(){
         Matrix res = new Matrix(this);
 
         for (int i = 0; i < Rows; i++){
@@ -91,21 +92,33 @@ public class Matrix {
         return res;
     }
 
-    public Matrix sigmaPrime(){
-        //Requires a nx1 matrix
-        //returns a diagonalized nxn matrix with the diagonal being simoidprime(input)
+//    public Matrix sigmaPrime(){
+//        //Requires a nx1 matrix
+//        //returns a diagonalized nxn matrix with the diagonal being simoidprime(input)
+//
+//        Matrix res = new Matrix(this.Rows);
+//
+//        Matrix outputSigmoidPrime = this.sigmoidPrime();
+//        for (int i = 0; i < this.Rows; i++){
+//            res.setValue(i,i,outputSigmoidPrime.getValue(i,0));
+//        }
+//        //set the values of sigmoidprime(output) to the diagonal
+//
+//        return res;
+//    }
 
-        Matrix res = new Matrix(this.Rows);
+    public Matrix HadamardProduct(Matrix m){
+        Matrix res = new Matrix(this);
 
-        Matrix outputSigmoidPrime = this.sigmoidPrime();
-        for (int i = 0; i < this.Rows; i++){
-            res.setValue(i,i,outputSigmoidPrime.getValue(i,0));
+        for (int i = 0; i < Rows; i++){
+            for (int j = 0; j < Columns; j++){
+                double product = getValue(i,j) * m.getValue(i,j);
+                res.setValue(i,j,product);
+            }
         }
-        //set the values of sigmoidprime(output) to the diagonal
 
         return res;
     }
-
 
 
 

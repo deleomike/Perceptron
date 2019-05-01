@@ -2,7 +2,9 @@ package com.company;
 
 import com.company.Matrix;
 
-public class Layer {
+import java.io.Serializable;
+
+public class Layer implements Serializable {
     private Matrix nodes;
     private Matrix weights;
     private Matrix biases;

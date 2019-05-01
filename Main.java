@@ -1,91 +1,34 @@
-
 /*
- * THINGS TO DO
- * diagrams
- * UML
- * SEQUENCE
- * USE CASE
- * code things
- * INTERFACE
- * (inheritance, composition, polymorphism)
- * INPUT VALIDATION
- * EXCEPTION HANDLING
- * DOCUMENTATION
- * PROPER ACCESS MODIFIERS
- * demo
- * PRESENTATION WITH DIAGRAMS
- * PREPARED DEMO
+ * Java 311 Final Project
+ * Neural Network Main
  */
     	package com.company;
 
     	import java.io.*;
     	import java.util.*;
-    	import Files_Operations.*;
-import ImageParse.LabelDecoder;
-import ImageParse.OurImageDecoder;
-import ImageParse.ProvidedImageDecoder;
+    	import MenuFiles.*;
 
     	public class Main {
 
     	    public static void main(String[] args) {
     	    	boolean menu = true;
 				NN first = new NN();
-				ArrayList<Matrix> train; //needs to be used outside of option 1 and 2
-				ArrayList<Matrix> test; //used in test menu
-	    		int[] labels; //needs to be used outside of option 1 and 2
     	    	while(menu)
     	    	{
     	    		Scanner in = new Scanner(System.in);
     	    		String choice="";
-    	    		do
+    	    		TrainMenu Mrain = new TrainMenu(); 
+    	    			do
+    	    			{
+    	    				Mrain.display();
+    	    				choice = in.next();
+    	    			}while(!choice.equals("1") && !choice.equals("2")&&!choice.equals("3")&&!choice.equals("-1"));
+    	    		Mrain.select(choice);
+    	    		if(choice.equals("1") ||choice.equals("2"))
     	    		{
-    	    			System.out.println("--Training Menu--\n1)First Run?\n2)Train From File\n3)Load Neural Network (-1 exit/next)");
-    	    			choice = in.next();
-    	    		}while(!choice.equals("1") && !choice.equals("2")&&!choice.equals("3")&&!choice.equals("-1"));
-    	    		if(choice.equals("1"))
-    	    		{
-    	    			System.out.println("Reading 60,000 images from MNIST database that have 28x28 data points, please wait..");
-    	    			ProvidedImageDecoder img = new ProvidedImageDecoder(false);
-    	    			System.out.println("Images decoded");
-    	    			OurImageDecoder OID = new OurImageDecoder(false);
-    	    			System.out.println("Java Object byte file created for training data, use \"train from file\" next time");
-    	    			LabelDecoder lbl = new LabelDecoder(false);
-    	    			System.out.println("Labels decoded");
-    	    			double[][] images = OID.getPix();
-    	    			labels = lbl.getval();
-    	    			train = new ArrayList<Matrix>();
-    	    	    	for(int i=0;i<images.length;i++)
-    	    	    	{
-    	    	    		train.add(new Matrix(images[i]));
-    	    	    	}
-    	    	    	System.out.println("Matrices setup");
-    	    	    	for(int i = 0; i<train.size();i++)
-    	    		    {
-    	    	    		
-    	    		    	first.Train(train.get(i), labels[i]);
-    	    		    }
+    	    			first= Mrain.getNN();
     	    		}
-    	    		else if(choice.equals("2"))
-    	    		{
-    	    			System.out.println("Using Object input stream from file \"TrainOI.obj\"");
-    	    			OurImageDecoder OID = new OurImageDecoder(false);
-    	    			System.out.println("Images decoded");
-    	    			LabelDecoder lbl = new LabelDecoder(false);
-    	    			System.out.println("Labels decoded");
-    	    			double[][] images = OID.getPix();
-    	    			labels = lbl.getval();
-    	    			train = new ArrayList<Matrix>();
-    	    	    	for(int i=0;i<images.length;i++)
-    	    	    	{
-    	    	    		train.add(new Matrix(images[i]));
-    	    	    	}
-    	    	    	System.out.println("Matrices setup");
-    	    	    	for(int i = 0; i<train.size();i++)
-    	    		    {
-    	    		    	first.Train(train.get(i), labels[i]);
-    	    		    }
-    	    		}
-    	    		else if(choice.equals("3"))
+    	    		if(choice.equals("3"))
     	    		{
     	    			System.out.println("Loading Neural Network from file \"data\"");
     	    			first = loadItems();
@@ -100,64 +43,16 @@ import ImageParse.ProvidedImageDecoder;
     	    	{
     	    		Scanner in = new Scanner(System.in);
     	    		String choice="";
-    	    		int correct=0;
-    	    		int total=0;
+    	    		TestMenu Mest = new TestMenu();
     	    		do
     	    		{
-    	    			System.out.println("--Testing Menu--\n1)First Test?\n2)Test from file?\n3)Save Neural Network\n4)Load Neural Network (-1 exit)");
+    	    			Mest.display();
     	    			choice = in.next();
-    	    		}while(!choice.equals("1") && !choice.equals("2")&&!choice.equals("3")&&!choice.equals("-1"));
-    	    		if(choice.equals("1"))
-    	    		{
-    	    			System.out.println("Reading raw image data from file provided on MNIST database...");
-    	    			ProvidedImageDecoder img = new ProvidedImageDecoder(true);
-    	    			System.out.println("Using Object input stream from file \"TestOI.obj\"");
-    	    			OurImageDecoder OID = new OurImageDecoder(true);
-    	    			System.out.println("Images decoded");
-    	    			LabelDecoder lbl = new LabelDecoder(true);
-    	    			System.out.println("Labels decoded");
-    	    			double[][] images = OID.getPix();
-    	    			labels = lbl.getval();
-    	    			test = new ArrayList<Matrix>();
-    	    	    	for(int i=0;i<images.length;i++)
-    	    	    	{
-    	    	    		test.add(new Matrix(images[i]));
-    	    	    	}
-    	    	    	System.out.println("Matrices setup");
-    	    	    	System.out.println("Testing data");
-    	    	    	for(int i = 0; i<test.size();i++)
-    	    		    {
-    	    	    		first.Test(test.get(i),labels[i]);
-    	    		    }
-    	    		}
-    	    		else if(choice.equals("2"))
-    	    		{
-    	    			System.out.println("Using Object input stream from file \"TestOI.obj\"");
-    	    			OurImageDecoder OID = new OurImageDecoder(true);
-    	    			System.out.println("Images decoded");
-    	    			LabelDecoder lbl = new LabelDecoder(true);
-    	    			System.out.println("Labels decoded");
-    	    			double[][] images = OID.getPix();
-    	    			labels = lbl.getval();
-    	    			test = new ArrayList<Matrix>();
-    	    	    	for(int i=0;i<images.length;i++)
-    	    	    	{
-    	    	    		test.add(new Matrix(images[i]));
-    	    	    	}
-    	    	    	System.out.println("Matrices setup");
-    	    	    	System.out.println("Testing data");
-    	    	    	for(int i = 0; i<test.size();i++)
-    	    		    {
-    	    	    		if(first.Test(test.get(i),labels[i]))
-    	    	    		{
-    	    	    			correct++;
-    	    	    			total++;
-    	    	    		}
-    	    	    		else
-    	    	    			total++;
-    	    		    }
-    	    	    	System.out.println("Neural Network Effectiveness: " +(double)correct/total *100 + " %");
-    	    		}
+    	    		}while(!choice.equals("1") && !choice.equals("2")&&!choice.equals("3")&&!choice.equals("4")&&!choice.equals("-1"));
+    	    		Mest.setNN(first);
+    	    		Mest.select(choice);
+    	    		if(choice.equals("1") ||choice.equals("2"))
+    	    			System.out.println("Neural Network Effectiveness: " +(double)Mest.getCorrect()/Mest.getTotal() *100 + " %");
     	    		else if(choice.equals("3"))
     	    		{
     	    			System.out.println("Saving Neural Network to file \"data\"");

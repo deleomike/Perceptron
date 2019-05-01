@@ -107,7 +107,7 @@ public class Matrix implements Serializable {
 //        return res;
 //    }
 
-    public Matrix HadamardProduct(Matrix m){
+    public Matrix HadamardProduct(Matrix m) throws MatrixDimensions{
         Matrix res = new Matrix(this);
 
         for (int i = 0; i < Rows; i++){
@@ -139,9 +139,9 @@ public class Matrix implements Serializable {
     }
 
     //this matrix is on the left, the given matrix is on the right
-    public Matrix multiply(Matrix m){
-        //TODO: Exception for  invalid matrices
+    public Matrix multiply(Matrix m) throws MatrixDimensions{
 
+        if (this.Rows != m.Rows){ throw new MatrixDimensions(this,m); }
 
         Matrix res = new Matrix(this.Rows,m.Columns);
 
@@ -166,8 +166,10 @@ public class Matrix implements Serializable {
 
     }
 
-    public Matrix add(Matrix m){
+    public Matrix add(Matrix m) throws MatrixDimensions{
         Matrix res = new Matrix(m.Rows,m.Columns);
+
+        if (this.Rows != m.Rows || this.Columns != m.Columns){ throw new MatrixDimensions(this,m);}
 
         for (int i = 0; i < Rows; i++){
             for (int j = 0; j < Columns; j++){

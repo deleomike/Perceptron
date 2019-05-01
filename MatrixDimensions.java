@@ -10,8 +10,8 @@ public class MatrixDimensions extends Exception{
     }
 
     MatrixDimensions(Matrix M, Matrix N){
-        Matrix1_N = M.sizey();
-        Matrix1_M = M.sizex();
+        Matrix1_N = M.sizex();
+        Matrix1_M = M.sizey();
 
         Matrix2_N = N.sizex();
         Matrix2_M = N.sizey();

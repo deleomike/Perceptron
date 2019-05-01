@@ -141,7 +141,7 @@ public class Matrix implements Serializable {
     //this matrix is on the left, the given matrix is on the right
     public Matrix multiply(Matrix m) throws MatrixDimensions{
 
-        if (this.Rows != m.Rows){ throw new MatrixDimensions(this,m); }
+        if (this.Columns != m.Rows){ throw new MatrixDimensions(this,m); }
 
         Matrix res = new Matrix(this.Rows,m.Columns);
 

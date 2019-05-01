@@ -238,8 +238,12 @@ public class Matrix implements Serializable {
 
     //Inverse for a non-square matrix
     Matrix PseudoInverse(){
-        Matrix AT = Transpose(); //Get transpose
-        Matrix A_inverse = (multiply(AT)).Inverse();    //(AT * A) ^-1
-        return AT.multiply(A_inverse);
+        try {
+            Matrix AT = Transpose(); //Get transpose
+            Matrix A_inverse = (multiply(AT)).Inverse();    //(AT * A) ^-1
+            return AT.multiply(A_inverse);
+        } catch(MatrixDimensions m){
+            return null;
+        }
     }
 }

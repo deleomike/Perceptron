@@ -1,5 +1,7 @@
 package com.company;
 
+import javafx.scene.transform.MatrixType;
+
 import java.io.Serializable;
 
 public class NN implements Serializable {
@@ -98,62 +100,66 @@ public class NN implements Serializable {
 
         Matrix costGradient = Cost(correctValue);
 
-        Matrix delta3 = sigmaPrime.HadamardProduct(costGradient);   //the error of the output layer
+        try {
 
-        //////////////////////////////////////////////////
-        //Find the second hidden layer delta
-        Matrix weights2 = HiddenLayer2.getWeights().Transpose(); //get transpose of the weights
-        Matrix nodes2 = HiddenLayer2.getNodes().sigmoidPrime();
-        //Matrix nodes2 = HiddenLayer2.getNodes().sigmaPrime(); //get sigmaprime(nodes)
-        Matrix delta2 = nodes2.HadamardProduct(weights2.multiply(delta3)); //the error for the second hidden layer
-        /////////////////////////////////////////////////
-        //Find the first hidden layer delta
-        Matrix weights1 = HiddenLayer1.getWeights().Transpose(); //get transpose of the weights
-        Matrix nodes1 = HiddenLayer1.getNodes().sigmoidPrime();
-        //Matrix nodes1 = HiddenLayer1.getNodes().sigmaPrime(); //get sigmaprime(nodes)
-        Matrix delta1 = nodes1.HadamardProduct(weights1.multiply(delta2)); //the error for the second hidden layer
-        /////////////////////////////////////////////////
-        //Find the input layer delta
-        Matrix weights0 = InputLayer.getWeights().Transpose(); //get transpose of the weights
-        Matrix nodes0 = InputLayer.getNodes().sigmoidPrime();
-        //Matrix nodes0 = InputLayer.getNodes().sigmaPrime(); //get sigmaprime(nodes)
-        Matrix delta0 = nodes0.HadamardProduct(weights0.multiply(delta1)); //the error for the second hidden layer
-        ////////////////////////////////////////////////
+            Matrix delta3 = sigmaPrime.HadamardProduct(costGradient);   //the error of the output layer
+
+            //////////////////////////////////////////////////
+            //Find the second hidden layer delta
+            Matrix weights2 = HiddenLayer2.getWeights().Transpose(); //get transpose of the weights
+            Matrix nodes2 = HiddenLayer2.getNodes().sigmoidPrime();
+            //Matrix nodes2 = HiddenLayer2.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+            Matrix delta2 = nodes2.HadamardProduct(weights2.multiply(delta3)); //the error for the second hidden layer
+            /////////////////////////////////////////////////
+            //Find the first hidden layer delta
+            Matrix weights1 = HiddenLayer1.getWeights().Transpose(); //get transpose of the weights
+            Matrix nodes1 = HiddenLayer1.getNodes().sigmoidPrime();
+            //Matrix nodes1 = HiddenLayer1.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+            Matrix delta1 = nodes1.HadamardProduct(weights1.multiply(delta2)); //the error for the second hidden layer
+            /////////////////////////////////////////////////
+            //Find the input layer delta
+            Matrix weights0 = InputLayer.getWeights().Transpose(); //get transpose of the weights
+            Matrix nodes0 = InputLayer.getNodes().sigmoidPrime();
+            //Matrix nodes0 = InputLayer.getNodes().sigmaPrime(); //get sigmaprime(nodes)
+            Matrix delta0 = nodes0.HadamardProduct(weights0.multiply(delta1)); //the error for the second hidden layer
+            ////////////////////////////////////////////////
 
 
+            //Now apply the changes to the weights and biases
+            //First the biases
+            ////////////////////////////////////////////////
+            Matrix inputBiases = InputLayer.getBiases();
+            Matrix Hidden1Biases = HiddenLayer1.getBiases();
+            Matrix Hidden2Biases = HiddenLayer2.getBiases();
 
-        //Now apply the changes to the weights and biases
-        //First the biases
-        ////////////////////////////////////////////////
-        Matrix inputBiases = InputLayer.getBiases();
-        Matrix Hidden1Biases = HiddenLayer1.getBiases();
-        Matrix Hidden2Biases = HiddenLayer2.getBiases();
+            //Add the delta to the biases
+            inputBiases = inputBiases.add(delta0);
+            Hidden1Biases = Hidden1Biases.add(delta1);
+            Hidden2Biases = Hidden2Biases.add(delta2);
 
-        //Add the delta to the biases
-        inputBiases = inputBiases.add(delta0);
-        Hidden1Biases = Hidden1Biases.add(delta1);
-        Hidden2Biases = Hidden2Biases.add(delta2);
+            //set the biases back into the layers
+            InputLayer.setBiases(inputBiases);
+            HiddenLayer1.setBiases(Hidden1Biases);
+            HiddenLayer2.setBiases(Hidden2Biases);
+            ///////////////////////////////////////////////
 
-        //set the biases back into the layers
-        InputLayer.setBiases(inputBiases);
-        HiddenLayer1.setBiases(Hidden1Biases);
-        HiddenLayer2.setBiases(Hidden2Biases);
-        ///////////////////////////////////////////////
+            //Now the weights
+            ///////////////////////////////////////////////
+            Matrix inputWeights = InputLayer.getWeights();
+            Matrix Hidden1Weights = HiddenLayer1.getWeights();
+            Matrix Hidden2Weights = HiddenLayer2.getWeights();
 
-        //Now the weights
-        ///////////////////////////////////////////////
-        Matrix inputWeights = InputLayer.getWeights();
-        Matrix Hidden1Weights = HiddenLayer1.getWeights();
-        Matrix Hidden2Weights = HiddenLayer2.getWeights();
+            inputWeights = inputWeights.add(InputLayer.getNodes().VectorCross(delta1));
+            Hidden1Weights = Hidden1Weights.add(HiddenLayer1.getNodes().VectorCross(delta2));
+            Hidden2Weights = Hidden2Weights.add(HiddenLayer2.getNodes().VectorCross(delta3));
 
-        inputWeights = inputWeights.add(InputLayer.getNodes().VectorCross(delta1));
-        Hidden1Weights = Hidden1Weights.add(HiddenLayer1.getNodes().VectorCross(delta2));
-        Hidden2Weights = Hidden2Weights.add(HiddenLayer2.getNodes().VectorCross(delta3));
-
-        InputLayer.setWeights(inputWeights);
-        HiddenLayer1.setWeights(Hidden1Weights);
-        HiddenLayer2.setWeights(Hidden2Weights);
-        //////////////////////////////////////////////
+            InputLayer.setWeights(inputWeights);
+            HiddenLayer1.setWeights(Hidden1Weights);
+            HiddenLayer2.setWeights(Hidden2Weights);
+            //////////////////////////////////////////////
+        } catch(MatrixDimensions m){
+            System.out.println(m.toString());
+        }
 
 
     }

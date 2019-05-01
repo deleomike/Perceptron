@@ -46,8 +46,8 @@ public class Layer implements Serializable {
             return (weights.multiply(nodes)).sigmoid();
             //e.g.) 16x782 * 782x1 = 16 x 1
         } catch(MatrixDimensions m){
-            System.out.println("Incorrect Dimensions for M * N: M(%d,%d) N(%d,%d)",m.Matrix1_N,m.Matrix1_M,m.Matrix2_N,m.Matrix2_M);
-            System.exit(1);
+            System.out.println(m.toString());
+            return null;
         }
 
     }
